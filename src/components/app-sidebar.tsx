@@ -20,7 +20,7 @@ export function AppSidebar() {
           <QubeLogo size="md" />
         </Link>
         <p className="mt-3 text-[11px] uppercase tracking-[0.25em] text-muted-foreground/70">
-          Private Client Suite
+          Social Automation Suite
         </p>
       </div>
 
@@ -58,11 +58,11 @@ export function AppSidebar() {
       <div className="p-4 border-t border-border/60">
         <div className="flex items-center gap-3 p-3 rounded-lg bg-card/60">
           <div className="h-9 w-9 rounded-full bg-gradient-gold flex items-center justify-center text-obsidian font-semibold text-sm">
-            AM
+            BV
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-cream truncate">Alexandre Marchetti</p>
-            <p className="text-[11px] text-gold/80 tracking-wider uppercase">Atelier Plan</p>
+            <p className="text-sm font-medium text-cream truncate">Bella Vita Trattoria</p>
+            <p className="text-[11px] text-gold/80 tracking-wider uppercase">Pro Plan</p>
           </div>
           <Link to="/" className="text-muted-foreground hover:text-gold transition">
             <LogOut className="h-4 w-4" />

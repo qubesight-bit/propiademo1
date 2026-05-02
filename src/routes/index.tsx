@@ -1,10 +1,10 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { QubeLogo } from "@/components/qube-logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowRight, Mail, Lock, AlertCircle } from "lucide-react";
+import { ArrowRight, Mail, Lock, AlertCircle, User } from "lucide-react";
 
 const VALID_EMAIL = "erlibbylugo@qubesight.lat";
 const VALID_PASSWORD = "@Qub3s1ght2001crc";
@@ -12,11 +12,11 @@ const VALID_PASSWORD = "@Qub3s1ght2001crc";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "QubeSight — Private Client Login" },
+      { title: "QubeSight — AI Social Media Automation" },
       {
         name: "description",
         content:
-          "QubeSight — the private automation suite for elite real estate professionals. Sign in to your atelier.",
+          "QubeSight — AI-powered social media automation for any business. Publish to Facebook, Instagram, TikTok and Marketplace in seconds.",
       },
     ],
   }),
@@ -44,32 +44,31 @@ function LoginPage() {
         <div className="relative z-10 max-w-lg space-y-8">
           <div className="hairline w-24" />
           <h1 className="font-display text-5xl xl:text-6xl leading-[1.05] text-cream">
-            The silent engine behind <span className="italic text-gradient-gold">extraordinary</span>{" "}
-            listings.
+            Publish <span className="italic text-gradient-gold">everywhere</span> in seconds.
           </h1>
           <p className="text-muted-foreground text-lg leading-relaxed font-light">
-            QubeSight orchestrates intelligent publication of luxury properties across every social
-            channel — composed, scheduled, and elevated by AI.
+            QubeSight uses AI to generate and publish your content across Facebook, Instagram,
+            TikTok and Marketplace — for any business, in any niche.
           </p>
           <div className="flex items-center gap-6 pt-4">
             <div>
-              <p className="font-display text-3xl text-gradient-gold">2.4B€</p>
+              <p className="font-display text-3xl text-gradient-gold">12k+</p>
               <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mt-1">
-                Listings published
+                Posts published
               </p>
             </div>
             <div className="h-10 w-px bg-border" />
             <div>
-              <p className="font-display text-3xl text-gradient-gold">418</p>
+              <p className="font-display text-3xl text-gradient-gold">2,400</p>
               <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mt-1">
-                Maisons clientes
+                Active businesses
               </p>
             </div>
           </div>
         </div>
 
         <p className="relative z-10 text-xs uppercase tracking-[0.3em] text-muted-foreground/70">
-          Paris · Monaco · New York · Dubai
+          Restaurants · Gyms · Stores · Academies · Clinics
         </p>
       </div>
 
@@ -82,15 +81,15 @@ function LoginPage() {
 
           <div className="space-y-3">
             <p className="text-[11px] uppercase tracking-[0.35em] text-gold">
-              {mode === "login" ? "Welcome back" : "Request access"}
+              {mode === "login" ? "Welcome back" : "Get started"}
             </p>
             <h2 className="font-display text-4xl text-cream">
-              {mode === "login" ? "Enter your atelier" : "Create your atelier"}
+              {mode === "login" ? "Sign in to QubeSight" : "Create your account"}
             </h2>
             <p className="text-muted-foreground text-sm">
               {mode === "login"
-                ? "Continue curating the world's most refined listings."
-                : "Join an invitation-only network of luxury real estate ateliers."}
+                ? "Continue automating your social presence."
+                : "Automate your social media in minutes — no technical skills required."}
             </p>
           </div>
 
@@ -119,12 +118,15 @@ function LoginPage() {
             {mode === "register" && (
               <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                  Full Name
+                  Business Name
                 </Label>
-                <Input
-                  placeholder="Alexandre Marchetti"
-                  className="h-12 bg-input border-border/60 focus-visible:ring-gold/40 focus-visible:border-gold/50"
-                />
+                <div className="relative">
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Bella Vita Trattoria"
+                    className="h-12 pl-11 bg-input border-border/60 focus-visible:ring-gold/40 focus-visible:border-gold/50"
+                  />
+                </div>
               </div>
             )}
             <div className="space-y-2">
@@ -137,7 +139,7 @@ function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="alexandre@maison.com"
+                  placeholder="you@business.com"
                   autoComplete="email"
                   className="h-12 pl-11 bg-input border-border/60 focus-visible:ring-gold/40 focus-visible:border-gold/50"
                 />
@@ -189,12 +191,12 @@ function LoginPage() {
           </div>
 
           <p className="text-center text-sm text-muted-foreground">
-            {mode === "login" ? "New to QubeSight?" : "Already have an atelier?"}{" "}
+            {mode === "login" ? "New to QubeSight?" : "Already have an account?"}{" "}
             <button
               onClick={() => setMode(mode === "login" ? "register" : "login")}
               className="text-gold hover:text-gold-soft transition font-medium"
             >
-              {mode === "login" ? "Request invitation" : "Sign in"}
+              {mode === "login" ? "Create account" : "Sign in"}
             </button>
           </p>
 

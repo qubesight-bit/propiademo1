@@ -3,13 +3,12 @@ import {
   Facebook,
   Instagram,
   Music2,
-  Store,
   Check,
   Crown,
   Mail,
-  User,
   Building,
-  Sparkles,
+  Tag,
+  Bell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +19,7 @@ export const Route = createFileRoute("/_app/settings")({
   head: () => ({
     meta: [
       { title: "Settings — QubeSight" },
-      { name: "description", content: "Manage connected accounts, subscription, and atelier profile." },
+      { name: "description", content: "Manage connected accounts, subscription, and business profile." },
     ],
   }),
   component: SettingsPage,
@@ -29,88 +28,75 @@ export const Route = createFileRoute("/_app/settings")({
 const accounts = [
   {
     icon: Instagram,
-    label: "Instagram",
-    handle: "@maison.marchetti",
+    label: "Instagram Business",
+    handle: "@bellavita.trattoria",
     connected: true,
     since: "Connected since Mar 2024",
   },
   {
     icon: Facebook,
-    label: "Facebook",
-    handle: "Maison Marchetti — Paris",
+    label: "Facebook Page",
+    handle: "Bella Vita Trattoria",
     connected: true,
     since: "Connected since Mar 2024",
   },
   {
     icon: Music2,
     label: "TikTok",
-    handle: "@marchetti.luxury",
+    handle: "@bellavita.eats",
     connected: true,
     since: "Connected since Aug 2024",
-  },
-  {
-    icon: Store,
-    label: "Marketplace",
-    handle: "Not connected",
-    connected: false,
-    since: "Syndicate to leading portals",
   },
 ];
 
 const plans = [
   {
-    id: "essence",
-    name: "Essence",
-    price: "€290",
-    note: "Solo brokers",
-    features: ["Up to 25 listings/mo", "3 connected channels", "Standard AI compositions"],
+    id: "basic",
+    name: "Basic",
+    price: "$20",
+    note: "Solo businesses",
+    features: [
+      "Up to 30 posts / month",
+      "2 connected platforms",
+      "Standard AI text generation",
+      "Email support",
+    ],
   },
   {
-    id: "atelier",
-    name: "Atelier",
-    price: "€690",
-    note: "Most chosen",
+    id: "pro",
+    name: "Pro",
+    price: "$35",
+    note: "Most popular",
     features: [
-      "Unlimited listings",
-      "All channels & cinematic reels",
-      "Concierge AI tone tuning",
-      "Priority publication windows",
+      "Unlimited posts",
+      "All 4 platforms",
+      "AI video generation",
+      "Smart scheduling",
+      "Priority support",
     ],
     current: true,
-  },
-  {
-    id: "private",
-    name: "Privé",
-    price: "Bespoke",
-    note: "Multi-office maisons",
-    features: [
-      "Dedicated relationship manager",
-      "Custom voice training",
-      "API & CRM integration",
-      "White-glove onboarding",
-    ],
   },
 ];
 
 function SettingsPage() {
   return (
-    <div className="px-10 py-12 max-w-[1400px] mx-auto">
+    <div className="px-6 sm:px-10 py-12 max-w-[1400px] mx-auto">
       <header className="mb-10">
-        <p className="text-[11px] uppercase tracking-[0.35em] text-gold mb-3">Atelier</p>
-        <h1 className="font-display text-5xl text-cream">
+        <p className="text-[11px] uppercase tracking-[0.35em] text-gold mb-3">Account</p>
+        <h1 className="font-display text-4xl sm:text-5xl text-cream">
           Settings & <span className="italic text-gradient-gold">Preferences</span>
         </h1>
         <p className="mt-3 text-muted-foreground max-w-2xl">
-          Curate your QubeSight experience — channels, subscription, and the voice of your atelier.
+          Manage your business profile, connected accounts, and subscription.
         </p>
       </header>
 
       <div className="space-y-10">
         {/* Profile */}
-        <section className="bg-gradient-card border border-border/60 rounded-xl p-7 shadow-soft">
-          <div className="flex items-start justify-between mb-7">
+        <section className="bg-gradient-card border border-border/60 rounded-xl p-5 sm:p-7 shadow-soft">
+          <div className="flex items-start justify-between mb-7 flex-wrap gap-4">
             <div>
-              <h2 className="font-display text-2xl text-cream">Profile</h2>
+              <h2 className="font-display text-2xl text-cream">Business Profile</h2>
               <p className="text-xs text-muted-foreground mt-1">
                 The identity behind every publication.
               </p>
@@ -123,26 +109,34 @@ function SettingsPage() {
           <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-8">
             <div className="flex flex-col items-center gap-3">
               <div className="h-28 w-28 rounded-full bg-gradient-gold flex items-center justify-center text-obsidian font-display text-3xl shadow-gold-glow">
-                AM
+                BV
               </div>
               <button className="text-xs uppercase tracking-[0.2em] text-gold hover:text-gold-soft transition">
-                Change portrait
+                Change logo
               </button>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <ProfileField icon={User} label="Full Name" defaultValue="Alexandre Marchetti" />
-              <ProfileField icon={Mail} label="Email" defaultValue="alexandre@maison-marchetti.fr" />
-              <ProfileField icon={Building} label="Atelier" defaultValue="Maison Marchetti — Paris" />
-              <ProfileField icon={Sparkles} label="Brand Voice" defaultValue="Discreet · refined · timeless" />
+              <ProfileField
+                icon={Building}
+                label="Business Name"
+                defaultValue="Bella Vita Trattoria"
+              />
+              <ProfileField icon={Tag} label="Category" defaultValue="Restaurant — Italian" />
+              <ProfileField
+                icon={Mail}
+                label="Notification Email"
+                defaultValue="erlibbylugo@qubesight.lat"
+              />
+              <ProfileField icon={Bell} label="Brand Voice" defaultValue="Warm · authentic · inviting" />
             </div>
           </div>
         </section>
 
         {/* Connected accounts */}
-        <section className="bg-gradient-card border border-border/60 rounded-xl p-7 shadow-soft">
+        <section className="bg-gradient-card border border-border/60 rounded-xl p-5 sm:p-7 shadow-soft">
           <div className="mb-7">
-            <h2 className="font-display text-2xl text-cream">Connected Channels</h2>
+            <h2 className="font-display text-2xl text-cream">Connected Accounts</h2>
             <p className="text-xs text-muted-foreground mt-1">
               Manage where QubeSight publishes on your behalf.
             </p>
@@ -182,7 +176,7 @@ function SettingsPage() {
                   <p className="text-[11px] text-muted-foreground mt-0.5">{a.since}</p>
                 </div>
                 <Button variant={a.connected ? "ghost" : "gold"} size="sm">
-                  {a.connected ? "Manage" : "Connect"}
+                  {a.connected ? "Disconnect" : "Connect"}
                 </Button>
               </div>
             ))}
@@ -191,19 +185,19 @@ function SettingsPage() {
 
         {/* Subscription */}
         <section>
-          <div className="mb-6 flex items-end justify-between">
+          <div className="mb-6 flex items-end justify-between flex-wrap gap-3">
             <div>
               <h2 className="font-display text-2xl text-cream">Subscription</h2>
               <p className="text-xs text-muted-foreground mt-1">
-                Your atelier is currently on the <span className="text-gold">Atelier</span> plan.
+                You're currently on the <span className="text-gold">Pro</span> plan.
               </p>
             </div>
             <p className="text-xs text-muted-foreground tracking-wider">
-              Next renewal · 14 December 2025
+              Next renewal · 14 December 2026
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-3xl">
             {plans.map((p) => (
               <div
                 key={p.id}
@@ -223,9 +217,7 @@ function SettingsPage() {
                 <h3 className="font-display text-3xl text-cream">{p.name}</h3>
                 <p className="font-display text-4xl text-gradient-gold mt-2">
                   {p.price}
-                  {p.price.startsWith("€") && (
-                    <span className="text-sm text-muted-foreground ml-1">/mo</span>
-                  )}
+                  <span className="text-sm text-muted-foreground ml-1">/mo</span>
                 </p>
 
                 <div className="hairline my-6" />
@@ -245,7 +237,7 @@ function SettingsPage() {
                   className="w-full"
                   disabled={p.current}
                 >
-                  {p.current ? "Current Plan" : p.id === "private" ? "Contact Us" : "Upgrade"}
+                  {p.current ? "Current Plan" : "Upgrade"}
                 </Button>
               </div>
             ))}
