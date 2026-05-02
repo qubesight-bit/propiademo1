@@ -53,31 +53,31 @@ export const Route = createFileRoute("/_app/dashboard")({
 const stats = [
   {
     label: "Posts This Month",
-    value: "128",
-    delta: "+18%",
+    value: "0",
+    delta: "—",
     icon: TrendingUp,
-    note: "vs. last month",
+    note: "no activity yet",
   },
   {
     label: "Active Campaigns",
-    value: "7",
-    delta: "+2 this week",
+    value: "0",
+    delta: "—",
     icon: Megaphone,
-    note: "scheduled & live",
+    note: "none scheduled",
   },
   {
     label: "Connected Platforms",
-    value: "3 / 4",
-    delta: "All healthy",
+    value: "0 / 4",
+    delta: "Connect to start",
     icon: Share2,
     note: "Instagram · Facebook · TikTok",
   },
   {
     label: "AI Generations",
-    value: "94",
-    delta: "+12 today",
+    value: "0",
+    delta: "—",
     icon: Sparkles,
-    note: "drafts created",
+    note: "no drafts yet",
   },
 ];
 
