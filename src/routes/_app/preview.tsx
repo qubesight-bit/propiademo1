@@ -1,5 +1,5 @@
-import { createFileRoute, useLocation } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { createFileRoute, useLocation, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import {
   Facebook,
   Instagram,
@@ -62,8 +62,43 @@ function extractTexts(ai: any): Record<PlatformKey, string> {
 
 function PreviewPage() {
   const location = useLocation();
-  const state = (location.state ?? {}) as { aiResponse?: any };
-  const aiResponse = state.aiResponse;
+  const navigate = useNavigate();
+  const stateFromRoute = (location.state ?? {}) as { aiResponse?: any };
+
+  const [aiResponse, setAiResponse] = useState<any>(() => {
+    if (stateFromRoute.aiResponse) return stateFromRoute.aiResponse;
+    if (typeof window === "undefined") return null;
+    const stored = sessionStorage.getItem("qs_pub_response");
+    return stored ? JSON.parse(stored) : null;
+  });
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const sync = () => {
+      const err = sessionStorage.getItem("qs_pub_error");
+      if (err) {
+        setLoadError(err);
+        return;
+      }
+      const stored = sessionStorage.getItem("qs_pub_response");
+      if (stored) {
+        try {
+          setAiResponse(JSON.parse(stored));
+          setLoadError(null);
+        } catch {
+          /* noop */
+        }
+      }
+    };
+    sync();
+    window.addEventListener("qs_pub_update", sync);
+    const interval = window.setInterval(sync, 1000);
+    return () => {
+      window.removeEventListener("qs_pub_update", sync);
+      window.clearInterval(interval);
+    };
+  }, []);
 
   const initialTexts = useMemo(() => extractTexts(aiResponse), [aiResponse]);
   const videoUrl: string | undefined =
@@ -72,6 +107,9 @@ function PreviewPage() {
     aiResponse?.video_thumbnail ?? aiResponse?.thumbnail ?? aiResponse?.cover_url;
 
   const [texts, setTexts] = useState(initialTexts);
+  useEffect(() => {
+    setTexts(extractTexts(aiResponse));
+  }, [aiResponse]);
   const [editing, setEditing] = useState<PlatformKey | null>(null);
   const [active, setActive] = useState<PlatformKey>("instagram");
   const [publishing, setPublishing] = useState(false);
@@ -79,7 +117,7 @@ function PreviewPage() {
 
   const platforms = Object.keys(platformMeta) as PlatformKey[];
 
-  const isLoading = !aiResponse;
+  const isLoading = !aiResponse && !loadError;
 
   const handlePublishAll = async () => {
     if (publishing || published) return;
@@ -101,6 +139,33 @@ function PreviewPage() {
       setPublishing(false);
     }
   };
+
+  if (loadError) {
+    return (
+      <div className="px-6 sm:px-10 py-12 max-w-[1400px] mx-auto">
+        <div className="min-h-[60vh] flex flex-col items-center justify-center text-center">
+          <p className="text-[11px] uppercase tracking-[0.35em] text-destructive mb-3">
+            Generation failed
+          </p>
+          <h1 className="font-display text-3xl sm:text-4xl text-cream">
+            Something went <span className="italic text-gradient-gold">wrong</span>
+          </h1>
+          <p className="mt-3 text-muted-foreground max-w-md">{loadError}</p>
+          <Button
+            variant="gold"
+            size="lg"
+            className="mt-8"
+            onClick={() => {
+              sessionStorage.removeItem("qs_pub_error");
+              navigate({ to: "/new" });
+            }}
+          >
+            Try again
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

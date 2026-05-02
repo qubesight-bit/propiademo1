@@ -139,29 +139,47 @@ function NewPublication() {
       fd.append("description", fields.description ?? "");
       fd.append("price", fields.price ?? "");
       fd.append("whatsapp", fields.whatsapp ?? "");
-      // Dynamic fields
       for (const f of dynamicFieldsConfig[bizType]) {
         fd.append(f.key, fields[f.key] ?? "");
       }
-      // Platforms
       const selectedPlatforms = Object.keys(enabled).filter((k) => enabled[k]);
       fd.append("platforms", JSON.stringify(selectedPlatforms));
-      // Files
       files.forEach((f, i) => {
         fd.append(`files`, f.file, f.file.name);
         if (i === 0) fd.append("cover", f.file, f.file.name);
       });
 
-      const res = await fetch(WEBHOOK_URL, { method: "POST", body: fd });
-      if (!res.ok) throw new Error(`Upload failed (${res.status})`);
-      let data: any = null;
-      try {
-        data = await res.json();
-      } catch {
-        data = { raw: await res.text() };
-      }
+      // Mark loading state in sessionStorage so /preview shows the spinner
+      sessionStorage.setItem("qs_pub_loading", "1");
+      sessionStorage.removeItem("qs_pub_response");
+      sessionStorage.removeItem("qs_pub_error");
+      sessionStorage.setItem("qs_pub_business_type", bizType);
 
-      navigate({ to: "/preview", state: { aiResponse: data, businessType: bizType } as any });
+      // Navigate immediately — preview page will display the spinner
+      navigate({ to: "/preview" });
+
+      // Fire the request in the background; preview polls sessionStorage
+      fetch(WEBHOOK_URL, { method: "POST", body: fd })
+        .then(async (res) => {
+          if (!res.ok) throw new Error(`Upload failed (${res.status})`);
+          let data: any;
+          try {
+            data = await res.json();
+          } catch {
+            data = { raw: await res.text() };
+          }
+          sessionStorage.setItem("qs_pub_response", JSON.stringify(data));
+          sessionStorage.removeItem("qs_pub_loading");
+          window.dispatchEvent(new Event("qs_pub_update"));
+        })
+        .catch((err) => {
+          sessionStorage.setItem(
+            "qs_pub_error",
+            err?.message ?? "Generation failed. Please try again.",
+          );
+          sessionStorage.removeItem("qs_pub_loading");
+          window.dispatchEvent(new Event("qs_pub_update"));
+        });
     } catch (err: any) {
       toast.error("Generation failed", { description: err?.message ?? "Please try again." });
       setSubmitting(false);
