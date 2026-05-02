@@ -13,17 +13,17 @@ import {
   MessageCircle,
   Share2,
   Check,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/preview")({
   head: () => ({
     meta: [
       { title: "AI Preview — QubeSight" },
-      { name: "description", content: "Review AI-composed posts before publishing across channels." },
+      { name: "description", content: "Review AI-generated posts before publishing." },
     ],
   }),
   component: PreviewPage,
@@ -34,25 +34,25 @@ const initial = {
     icon: Instagram,
     label: "Instagram",
     body:
-      "Discrétion absolue, Avenue Foch.\n\nUn triplex de 480 m² inonde Paris d'une lumière dorée — six chambres, marbres rares, ascenseur privé, terrasse panoramique sur l'Arc de Triomphe.\n\nUne adresse qui ne se nomme pas. Une vie qui ne se raconte qu'en privé.\n\n€18,500,000 · Visite sur invitation.\n\n#LuxuryRealEstate #ParisLuxury #Penthouse #AvenueFoch #PrivateListing",
+      "✨ Tonight's Chef's Special: Truffle Risotto ✨\n\nSlow-stirred Carnaroli rice, shaved black truffle, aged parmesan — finished tableside.\n\nLimited servings. Reserve your table now.\n\n📍 Bella Vita Trattoria\n📞 WhatsApp: +1 555 123 4567\n\n#truffle #risotto #italianfood #finedining #chefspecial #foodie",
   },
   facebook: {
     icon: Facebook,
     label: "Facebook",
     body:
-      "Une rareté absolue dans le 16ème arrondissement.\n\nNous avons l'honneur de présenter un triplex d'exception de 480 m² Avenue Foch — 6 chambres, 5 salles d'eau, terrasse de 120 m² avec vue panoramique sur l'Arc de Triomphe.\n\nProvenance prestigieuse · finitions sur-mesure · ascenseur privatif.\n\n€18,500,000 — Visite uniquement sur dossier.",
+      "Tonight only at Bella Vita Trattoria — our signature Truffle Risotto is back.\n\nMade with imported Carnaroli rice, freshly shaved black truffle, and 24-month aged Parmigiano-Reggiano. Slow-stirred for 22 minutes the traditional way.\n\nOnly 18 servings available tonight. Reserve via WhatsApp: +1 555 123 4567",
   },
   tiktok: {
     icon: Music2,
     label: "TikTok",
     body:
-      "POV: you're stepping into Paris' most discreet penthouse 🥂\n\n480m² · 6 bedrooms · panoramic Arc de Triomphe views\n\nThe address only the right people know about.\n\n€18.5M ✨\n\n#luxuryhomes #parislife #realestatetiktok #penthouse #milliondollarlisting",
+      "POV: the truffle risotto comes out of the kitchen 🍄✨\n\nSlow-stirred 22 minutes. Shaved tableside. The smell hits before it lands.\n\nOnly 18 servings tonight 🔥\n\n#truffle #risotto #foodtok #pov #fyp #italianfood #chefslife",
   },
   marketplace: {
     icon: Store,
     label: "Marketplace",
     body:
-      "Penthouse Triplex — Avenue Foch, 75116 Paris\n\n480 m² · 6 chambres · 5 sdb · Terrasse 120 m²\n\nTriplex d'exception en dernier étage avec ascenseur privatif. Vue panoramique sur l'Arc de Triomphe et le Trocadéro. Marbres de Carrare, parquet Versailles, cuisine sur-mesure.\n\nServices: concierge 24/7, parking 3 voitures, cave.\n\nPrix : €18,500,000",
+      "Truffle Risotto — Chef's Special\n\nBella Vita Trattoria · Tonight only\n\nCarnaroli rice · Black truffle · Aged parmesan · 22-min slow stir\n\nDine-in: $34 · Takeaway available\n\nReserve: +1 555 123 4567",
   },
 };
 
@@ -67,18 +67,18 @@ function PreviewPage() {
   const platforms = Object.keys(initial) as PlatformKey[];
 
   return (
-    <div className="px-10 py-12 max-w-[1400px] mx-auto">
+    <div className="px-6 sm:px-10 py-12 max-w-[1400px] mx-auto">
       <header className="flex items-end justify-between mb-10 flex-wrap gap-6">
         <div>
           <p className="text-[11px] uppercase tracking-[0.35em] text-gold mb-3 flex items-center gap-2">
-            <Sparkles className="h-3 w-3" /> AI Composition Ready
+            <Sparkles className="h-3 w-3" /> AI Generation Ready
           </p>
-          <h1 className="font-display text-5xl text-cream">
+          <h1 className="font-display text-4xl sm:text-5xl text-cream">
             Preview & <span className="italic text-gradient-gold">Refine</span>
           </h1>
           <p className="mt-3 text-muted-foreground max-w-2xl">
-            Each composition has been tailored to the voice of its channel. Review, edit, and
-            publish at your discretion.
+            Each post is tailored to the voice of its channel. Review, edit, and publish to all
+            platforms with one click.
           </p>
         </div>
         <Button
@@ -86,7 +86,7 @@ function PreviewPage() {
           size="xl"
           onClick={() => setPublished(true)}
           disabled={published}
-          className="min-w-[220px]"
+          className="min-w-[200px]"
         >
           {published ? (
             <>
@@ -104,7 +104,7 @@ function PreviewPage() {
         {/* Left — platform tabs + text editors */}
         <div className="lg:col-span-3 space-y-5">
           {/* Platform tabs */}
-          <div className="flex gap-2 p-1.5 bg-card/60 border border-border/60 rounded-xl">
+          <div className="flex gap-1.5 p-1.5 bg-card/60 border border-border/60 rounded-xl overflow-x-auto">
             {platforms.map((key) => {
               const p = texts[key];
               const Icon = p.icon;
@@ -114,7 +114,7 @@ function PreviewPage() {
                   key={key}
                   onClick={() => setActive(key)}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm transition-all",
+                    "flex-1 min-w-fit flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm transition-all",
                     isActive
                       ? "bg-gradient-gold text-obsidian font-semibold shadow-gold-glow"
                       : "text-muted-foreground hover:text-cream hover:bg-accent/40",
@@ -136,7 +136,7 @@ function PreviewPage() {
             return (
               <article
                 key={key}
-                className="bg-gradient-card border border-border/60 rounded-xl p-7 shadow-soft"
+                className="bg-gradient-card border border-border/60 rounded-xl p-5 sm:p-7 shadow-soft"
               >
                 <div className="flex items-center justify-between mb-5">
                   <div className="flex items-center gap-3">
@@ -144,9 +144,9 @@ function PreviewPage() {
                       <Icon className="h-4 w-4 text-gold" />
                     </div>
                     <div>
-                      <p className="font-display text-xl text-cream">{p.label} Composition</p>
+                      <p className="font-display text-xl text-cream">{p.label} Post</p>
                       <p className="text-[11px] uppercase tracking-[0.2em] text-gold/80">
-                        AI · refined for tone
+                        AI · tone-tuned
                       </p>
                     </div>
                   </div>
@@ -184,8 +184,7 @@ function PreviewPage() {
 
                 <div className="flex items-center justify-between pt-5 mt-5 border-t border-border/40">
                   <p className="text-xs text-muted-foreground">
-                    {p.body.length} characters · ~{Math.ceil(p.body.split(/\s+/).length / 200)} min
-                    read
+                    {p.body.length} characters
                   </p>
                   <div className="flex items-center gap-1.5">
                     <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse" />
@@ -197,15 +196,15 @@ function PreviewPage() {
           })}
         </div>
 
-        {/* Right — video preview & social card */}
+        {/* Right — video preview */}
         <aside className="lg:col-span-2 space-y-6">
           {/* Video card */}
           <section className="bg-gradient-card border border-border/60 rounded-xl p-5 shadow-soft">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="font-display text-lg text-cream">Cinematic Reel</p>
+                <p className="font-display text-lg text-cream">TikTok Video</p>
                 <p className="text-[11px] uppercase tracking-[0.2em] text-gold/80">
-                  AI-composed · 28s
+                  AI-generated · 24s
                 </p>
               </div>
               <span className="text-[10px] uppercase tracking-wider px-2 py-1 rounded bg-gold/10 text-gold border border-gold/20">
@@ -218,7 +217,7 @@ function PreviewPage() {
                 className="absolute inset-0 bg-cover bg-center"
                 style={{
                   backgroundImage:
-                    "linear-gradient(180deg, oklch(0.16 0.005 80 / 0.2) 0%, oklch(0.16 0.005 80 / 0.85) 100%), url(https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=900&q=85)",
+                    "linear-gradient(180deg, oklch(0.16 0.005 80 / 0.2) 0%, oklch(0.16 0.005 80 / 0.85) 100%), url(https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=900&q=85)",
                 }}
               />
               <div className="absolute inset-0 flex items-center justify-center">
@@ -230,23 +229,23 @@ function PreviewPage() {
               <div className="absolute bottom-0 left-0 right-0 p-4 space-y-1">
                 <p className="text-[10px] uppercase tracking-[0.25em] text-gold">Now showing</p>
                 <p className="font-display text-cream text-lg leading-tight">
-                  Penthouse Avenue Foch
+                  Truffle Risotto
                 </p>
-                <p className="text-gradient-gold font-display text-2xl">€18,500,000</p>
+                <p className="text-gradient-gold font-display text-xl">$34 · Tonight only</p>
               </div>
 
               <div className="absolute top-3 right-3 flex flex-col gap-3 text-cream/90">
                 <div className="flex flex-col items-center gap-0.5">
                   <Heart className="h-5 w-5" />
-                  <span className="text-[10px]">12.4k</span>
+                  <span className="text-[10px]">8.2k</span>
                 </div>
                 <div className="flex flex-col items-center gap-0.5">
                   <MessageCircle className="h-5 w-5" />
-                  <span className="text-[10px]">284</span>
+                  <span className="text-[10px]">142</span>
                 </div>
                 <div className="flex flex-col items-center gap-0.5">
                   <Share2 className="h-5 w-5" />
-                  <span className="text-[10px]">96</span>
+                  <span className="text-[10px]">64</span>
                 </div>
               </div>
 
@@ -256,40 +255,29 @@ function PreviewPage() {
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-              {[
-                { l: "Music", v: "Atelier" },
-                { l: "Cuts", v: "14" },
-                { l: "Hook", v: "0:02" },
-              ].map((s) => (
-                <div key={s.l} className="p-2.5 rounded-md bg-obsidian/60 border border-border/40">
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                    {s.l}
-                  </p>
-                  <p className="font-display text-cream text-sm mt-0.5">{s.v}</p>
-                </div>
-              ))}
-            </div>
+            <Button variant="luxury" size="lg" className="w-full mt-4">
+              <Download className="h-4 w-4" /> Download Video
+            </Button>
           </section>
 
           {/* Schedule card */}
           <section className="bg-gradient-card border border-border/60 rounded-xl p-6 shadow-soft">
-            <p className="font-display text-lg text-cream mb-1">Publication Window</p>
+            <p className="font-display text-lg text-cream mb-1">Best Time to Post</p>
             <p className="text-xs text-muted-foreground mb-5">
-              Optimal engagement detected by QubeSight intelligence.
+              Optimal engagement window detected by QubeSight AI.
             </p>
 
             <div className="flex items-center justify-between p-4 rounded-lg bg-obsidian/60 border border-gold/20">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.2em] text-gold">Recommended</p>
-                <p className="font-display text-cream text-xl mt-0.5">19:42 CET</p>
+                <p className="font-display text-cream text-xl mt-0.5">7:42 PM</p>
                 <p className="text-xs text-muted-foreground mt-0.5">Today, Tuesday</p>
               </div>
-              <Switch defaultChecked className="data-[state=checked]:bg-gold" />
+              <span className="text-[10px] uppercase tracking-wider text-gold">Auto</span>
             </div>
 
             <p className="text-[10px] text-center text-muted-foreground/70 uppercase tracking-[0.2em] mt-4">
-              Estimated reach · 1.2M qualified
+              Estimated reach · 12k qualified
             </p>
           </section>
         </aside>
