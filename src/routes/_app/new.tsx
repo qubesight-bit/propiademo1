@@ -39,6 +39,16 @@ export const Route = createFileRoute("/_app/new")({
 
 const WEBHOOK_URL = "https://qubesightprojects.fun/webhook/publicar-propiedad";
 
+async function parseWebhookResponse(res: Response) {
+  const body = await res.text();
+  if (!body) return null;
+  try {
+    return JSON.parse(body);
+  } catch {
+    return { raw: body };
+  }
+}
+
 const platforms = [
   { id: "instagram", label: "Instagram", reach: "Reels · Feed · Stories", icon: Instagram, on: true },
   { id: "facebook", label: "Facebook", reach: "Page · Reels", icon: Facebook, on: true },
@@ -161,12 +171,10 @@ function NewPublication() {
       // Fire the request in the background; preview polls sessionStorage
       fetch(WEBHOOK_URL, { method: "POST", body: fd })
         .then(async (res) => {
-          if (!res.ok) throw new Error(`Upload failed (${res.status})`);
-          let data: any;
-          try {
-            data = await res.json();
-          } catch {
-            data = { raw: await res.text() };
+          const data = await parseWebhookResponse(res);
+          if (!res.ok) {
+            const message = data?.error ?? data?.message ?? data?.raw ?? res.statusText;
+            throw new Error(`Generation failed (${res.status}): ${message}`);
           }
           sessionStorage.setItem("qs_pub_response", JSON.stringify(data));
           sessionStorage.removeItem("qs_pub_loading");
