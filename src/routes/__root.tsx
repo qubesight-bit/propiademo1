@@ -43,6 +43,12 @@ export const Route = createRootRoute({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "QubeSight — Luxury Real Estate Automation" },
+      { name: "description", content: "PropIA is an AI-powered social media automation SaaS for businesses." },
+      { property: "og:description", content: "PropIA is an AI-powered social media automation SaaS for businesses." },
+      { name: "twitter:description", content: "PropIA is an AI-powered social media automation SaaS for businesses." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0ffdaa31-3e1a-4356-93a5-0f3aeb8b0bfe/id-preview-e52fdbe7--4fd218c2-068a-4540-a8b6-4f6364903454.lovable.app-1777681943801.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0ffdaa31-3e1a-4356-93a5-0f3aeb8b0bfe/id-preview-e52fdbe7--4fd218c2-068a-4540-a8b6-4f6364903454.lovable.app-1777681943801.png" },
     ],
     links: [
       {
