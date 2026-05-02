@@ -99,48 +99,7 @@ type Publication = {
   time: string;
 };
 
-const initialPublications: Publication[] = [
-  {
-    id: "p1",
-    title: "Truffle Risotto — Chef's Special",
-    type: "Restaurant",
-    thumb: "https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=400&q=80",
-    platforms: ["instagram", "facebook", "tiktok"],
-    status: "Published",
-    statusType: "published",
-    time: "2 minutes ago",
-  },
-  {
-    id: "p2",
-    title: "Sunrise HIIT — Tuesday 7am",
-    type: "Gym",
-    thumb: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&q=80",
-    platforms: ["instagram", "facebook"],
-    status: "Scheduled",
-    statusType: "scheduled",
-    time: "Tomorrow, 06:30",
-  },
-  {
-    id: "p3",
-    title: "Summer Collection — 30% Off",
-    type: "Store",
-    thumb: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&q=80",
-    platforms: ["instagram", "facebook", "tiktok", "marketplace"],
-    status: "Draft",
-    statusType: "draft",
-    time: "Awaiting review",
-  },
-  {
-    id: "p4",
-    title: "English Course — Enrollment Open",
-    type: "Academy",
-    thumb: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&q=80",
-    platforms: ["facebook", "instagram"],
-    status: "Published",
-    statusType: "published",
-    time: "Yesterday",
-  },
-];
+const initialPublications: Publication[] = [];
 
 const statusStyles: Record<string, string> = {
   published: "bg-gold/10 text-gold border-gold/30",
@@ -198,7 +157,7 @@ function Dashboard() {
             Good evening, <span className="italic text-gradient-gold">Erlibby</span>
           </h1>
           <p className="mt-3 text-muted-foreground max-w-xl">
-            You published 14 posts this week across 3 platforms. Three drafts are awaiting your review.
+            Your workspace is ready. Connect a platform and create your first publication to get started.
           </p>
         </div>
         <Button variant="gold" size="lg" asChild className="hidden sm:inline-flex">
