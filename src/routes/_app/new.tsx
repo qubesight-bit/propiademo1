@@ -176,6 +176,9 @@ function NewPublication() {
             const message = data?.error ?? data?.message ?? data?.raw ?? res.statusText;
             throw new Error(`Generation failed (${res.status}): ${message}`);
           }
+          if (!data) {
+            throw new Error("The AI service returned an empty response. Please try again.");
+          }
           sessionStorage.setItem("qs_pub_response", JSON.stringify(data));
           sessionStorage.removeItem("qs_pub_loading");
           window.dispatchEvent(new Event("qs_pub_update"));
