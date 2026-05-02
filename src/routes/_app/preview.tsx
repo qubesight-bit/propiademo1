@@ -140,6 +140,33 @@ function PreviewPage() {
     }
   };
 
+  if (loadError) {
+    return (
+      <div className="px-6 sm:px-10 py-12 max-w-[1400px] mx-auto">
+        <div className="min-h-[60vh] flex flex-col items-center justify-center text-center">
+          <p className="text-[11px] uppercase tracking-[0.35em] text-destructive mb-3">
+            Generation failed
+          </p>
+          <h1 className="font-display text-3xl sm:text-4xl text-cream">
+            Something went <span className="italic text-gradient-gold">wrong</span>
+          </h1>
+          <p className="mt-3 text-muted-foreground max-w-md">{loadError}</p>
+          <Button
+            variant="gold"
+            size="lg"
+            className="mt-8"
+            onClick={() => {
+              sessionStorage.removeItem("qs_pub_error");
+              navigate({ to: "/new" });
+            }}
+          >
+            Try again
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="px-6 sm:px-10 py-12 max-w-[1400px] mx-auto">
