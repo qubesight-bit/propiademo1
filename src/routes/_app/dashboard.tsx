@@ -149,6 +149,40 @@ const statusStyles: Record<string, string> = {
 };
 
 function Dashboard() {
+  const navigate = useNavigate();
+  const [publications, setPublications] = useState<Publication[]>(initialPublications);
+  const [toDelete, setToDelete] = useState<Publication | null>(null);
+
+  const handleOpen = (p: Publication) => {
+    toast.success(`Opening "${p.title}"`);
+    navigate({ to: "/preview" });
+  };
+
+  const handleDuplicate = (p: Publication) => {
+    const copy: Publication = {
+      ...p,
+      id: `${p.id}-copy-${Date.now()}`,
+      title: `${p.title} (Copy)`,
+      status: "Draft",
+      statusType: "draft",
+      time: "Just now",
+    };
+    setPublications((prev) => {
+      const idx = prev.findIndex((x) => x.id === p.id);
+      const next = [...prev];
+      next.splice(idx + 1, 0, copy);
+      return next;
+    });
+    toast.success("Publication duplicated");
+  };
+
+  const confirmDelete = () => {
+    if (!toDelete) return;
+    setPublications((prev) => prev.filter((x) => x.id !== toDelete.id));
+    toast.success(`"${toDelete.title}" deleted`);
+    setToDelete(null);
+  };
+
   return (
     <div className="px-6 sm:px-10 py-12 max-w-[1400px] mx-auto pb-32">
       {/* Header */}
