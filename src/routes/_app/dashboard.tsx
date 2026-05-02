@@ -213,7 +213,30 @@ function Dashboard() {
         </div>
 
         <div className="space-y-2">
-          {publications.length === 0 && (
+          {isLoading &&
+            Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={`sk-${i}`}
+                className="flex items-center gap-4 p-3 sm:p-4 rounded-lg border border-transparent"
+              >
+                <Skeleton className="h-14 w-14 sm:h-16 sm:w-16 rounded-lg shrink-0 bg-cream/5" />
+                <div className="flex-1 min-w-0 space-y-2">
+                  <Skeleton className="h-4 w-2/3 bg-cream/5" />
+                  <Skeleton className="h-3 w-20 bg-cream/5" />
+                  <div className="flex gap-1.5 pt-1">
+                    <Skeleton className="h-5 w-5 rounded-full bg-cream/5" />
+                    <Skeleton className="h-5 w-5 rounded-full bg-cream/5" />
+                    <Skeleton className="h-5 w-5 rounded-full bg-cream/5" />
+                  </div>
+                </div>
+                <div className="hidden sm:block text-right space-y-2 shrink-0">
+                  <Skeleton className="h-5 w-24 rounded-full bg-cream/5 ml-auto" />
+                  <Skeleton className="h-3 w-20 bg-cream/5 ml-auto" />
+                </div>
+                <Skeleton className="h-9 w-9 rounded-md bg-cream/5 shrink-0" />
+              </div>
+            ))}
+          {!isLoading && publications.length === 0 && (
             <div className="text-center py-16 px-6 border border-dashed border-border/60 rounded-lg">
               <div className="mx-auto h-12 w-12 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mb-4">
                 <Sparkles className="h-5 w-5 text-gold" />
