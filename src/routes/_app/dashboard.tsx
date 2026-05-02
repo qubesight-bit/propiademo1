@@ -291,6 +291,32 @@ function Dashboard() {
                   </span>
                   <p className="text-[11px] text-muted-foreground mt-1.5">{p.time}</p>
                 </div>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      className="h-9 w-9 shrink-0 rounded-md flex items-center justify-center text-cream/60 hover:text-gold hover:bg-gold/5 border border-transparent hover:border-gold/20 transition-colors focus:outline-none focus:ring-1 focus:ring-gold/40"
+                      aria-label={`Actions for ${p.title}`}
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-44">
+                    <DropdownMenuItem onClick={() => handleOpen(p)}>
+                      <Eye className="h-4 w-4" /> Open
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleDuplicate(p)}>
+                      <Copy className="h-4 w-4" /> Duplicate
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => setToDelete(p)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" /> Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             );
           })}
