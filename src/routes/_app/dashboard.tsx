@@ -205,6 +205,22 @@ function Dashboard() {
         </div>
 
         <div className="space-y-2">
+          {publications.length === 0 && (
+            <div className="text-center py-16 px-6 border border-dashed border-border/60 rounded-lg">
+              <div className="mx-auto h-12 w-12 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mb-4">
+                <Sparkles className="h-5 w-5 text-gold" />
+              </div>
+              <p className="font-display text-xl text-cream mb-2">No publications yet</p>
+              <p className="text-sm text-muted-foreground max-w-sm mx-auto mb-6">
+                Create your first AI-generated post and publish it across your channels in seconds.
+              </p>
+              <Button variant="gold" asChild>
+                <Link to="/new">
+                  <Plus className="h-4 w-4" /> New Publication
+                </Link>
+              </Button>
+            </div>
+          )}
           {publications.map((p, i) => {
             const StatusIcon =
               p.statusType === "published" ? CheckCircle2 : p.statusType === "scheduled" ? Clock : Sparkles;
