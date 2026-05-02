@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, useLocation } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
 import {
   Facebook,
   Instagram,
@@ -14,7 +14,9 @@ import {
   Share2,
   Check,
   Download,
+  Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -29,42 +31,100 @@ export const Route = createFileRoute("/_app/preview")({
   component: PreviewPage,
 });
 
-const initial = {
-  instagram: {
-    icon: Instagram,
-    label: "Instagram",
-    body:
-      "✨ Tonight's Chef's Special: Truffle Risotto ✨\n\nSlow-stirred Carnaroli rice, shaved black truffle, aged parmesan — finished tableside.\n\nLimited servings. Reserve your table now.\n\n📍 Bella Vita Trattoria\n📞 WhatsApp: +1 555 123 4567\n\n#truffle #risotto #italianfood #finedining #chefspecial #foodie",
-  },
-  facebook: {
-    icon: Facebook,
-    label: "Facebook",
-    body:
-      "Tonight only at Bella Vita Trattoria — our signature Truffle Risotto is back.\n\nMade with imported Carnaroli rice, freshly shaved black truffle, and 24-month aged Parmigiano-Reggiano. Slow-stirred for 22 minutes the traditional way.\n\nOnly 18 servings available tonight. Reserve via WhatsApp: +1 555 123 4567",
-  },
-  tiktok: {
-    icon: Music2,
-    label: "TikTok",
-    body:
-      "POV: the truffle risotto comes out of the kitchen 🍄✨\n\nSlow-stirred 22 minutes. Shaved tableside. The smell hits before it lands.\n\nOnly 18 servings tonight 🔥\n\n#truffle #risotto #foodtok #pov #fyp #italianfood #chefslife",
-  },
-  marketplace: {
-    icon: Store,
-    label: "Marketplace",
-    body:
-      "Truffle Risotto — Chef's Special\n\nBella Vita Trattoria · Tonight only\n\nCarnaroli rice · Black truffle · Aged parmesan · 22-min slow stir\n\nDine-in: $34 · Takeaway available\n\nReserve: +1 555 123 4567",
-  },
+const WEBHOOK_URL = "https://qubesightprojects.fun/webhook/publicar-propiedad";
+
+const platformMeta = {
+  instagram: { icon: Instagram, label: "Instagram" },
+  facebook: { icon: Facebook, label: "Facebook" },
+  tiktok: { icon: Music2, label: "TikTok" },
+  marketplace: { icon: Store, label: "Marketplace" },
+} as const;
+
+type PlatformKey = keyof typeof platformMeta;
+
+const fallbackTexts: Record<PlatformKey, string> = {
+  instagram: "",
+  facebook: "",
+  tiktok: "",
+  marketplace: "",
 };
 
-type PlatformKey = keyof typeof initial;
+function extractTexts(ai: any): Record<PlatformKey, string> {
+  if (!ai) return fallbackTexts;
+  const src = ai.texts ?? ai.posts ?? ai;
+  return {
+    instagram: src?.instagram ?? src?.Instagram ?? src?.ig ?? "",
+    facebook: src?.facebook ?? src?.Facebook ?? src?.fb ?? "",
+    tiktok: src?.tiktok ?? src?.TikTok ?? src?.tt ?? "",
+    marketplace: src?.marketplace ?? src?.Marketplace ?? "",
+  };
+}
 
 function PreviewPage() {
-  const [texts, setTexts] = useState(initial);
+  const location = useLocation();
+  const state = (location.state ?? {}) as { aiResponse?: any };
+  const aiResponse = state.aiResponse;
+
+  const initialTexts = useMemo(() => extractTexts(aiResponse), [aiResponse]);
+  const videoUrl: string | undefined =
+    aiResponse?.video_url ?? aiResponse?.videoUrl ?? aiResponse?.video?.url;
+  const videoThumb: string | undefined =
+    aiResponse?.video_thumbnail ?? aiResponse?.thumbnail ?? aiResponse?.cover_url;
+
+  const [texts, setTexts] = useState(initialTexts);
   const [editing, setEditing] = useState<PlatformKey | null>(null);
   const [active, setActive] = useState<PlatformKey>("instagram");
+  const [publishing, setPublishing] = useState(false);
   const [published, setPublished] = useState(false);
 
-  const platforms = Object.keys(initial) as PlatformKey[];
+  const platforms = Object.keys(platformMeta) as PlatformKey[];
+
+  const isLoading = !aiResponse;
+
+  const handlePublishAll = async () => {
+    if (publishing || published) return;
+    setPublishing(true);
+    try {
+      const fd = new FormData();
+      fd.append("action", "publish");
+      fd.append("texts", JSON.stringify(texts));
+      if (videoUrl) fd.append("video_url", videoUrl);
+      if (aiResponse?.id) fd.append("publication_id", String(aiResponse.id));
+
+      const res = await fetch(WEBHOOK_URL, { method: "POST", body: fd });
+      if (!res.ok) throw new Error(`Publish failed (${res.status})`);
+      setPublished(true);
+      toast.success("Published to all platforms");
+    } catch (err: any) {
+      toast.error("Publish failed", { description: err?.message ?? "Please try again." });
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="px-6 sm:px-10 py-12 max-w-[1400px] mx-auto">
+        <div className="min-h-[60vh] flex flex-col items-center justify-center text-center">
+          <div className="relative h-20 w-20 mb-8">
+            <div className="absolute inset-0 rounded-full bg-gold/10 border border-gold/20 animate-pulse" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Loader2 className="h-8 w-8 text-gold animate-spin" />
+            </div>
+          </div>
+          <p className="text-[11px] uppercase tracking-[0.35em] text-gold mb-3 flex items-center gap-2">
+            <Sparkles className="h-3 w-3" /> QubeSight AI
+          </p>
+          <h1 className="font-display text-3xl sm:text-4xl text-cream">
+            Crafting your <span className="italic text-gradient-gold">publication</span>
+          </h1>
+          <p className="mt-3 text-muted-foreground max-w-md">
+            We're tuning the voice for every channel. This usually takes about 10 seconds.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="px-6 sm:px-10 py-12 max-w-[1400px] mx-auto">
@@ -84,13 +144,17 @@ function PreviewPage() {
         <Button
           variant="gold"
           size="xl"
-          onClick={() => setPublished(true)}
-          disabled={published}
+          onClick={handlePublishAll}
+          disabled={publishing || published}
           className="min-w-[200px]"
         >
           {published ? (
             <>
-              <Check className="h-4 w-4" /> Publishing…
+              <Check className="h-4 w-4" /> Published
+            </>
+          ) : publishing ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" /> Publishing…
             </>
           ) : (
             <>
@@ -103,11 +167,9 @@ function PreviewPage() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Left — platform tabs + text editors */}
         <div className="lg:col-span-3 space-y-5">
-          {/* Platform tabs */}
           <div className="flex gap-1.5 p-1.5 bg-card/60 border border-border/60 rounded-xl overflow-x-auto">
             {platforms.map((key) => {
-              const p = texts[key];
-              const Icon = p.icon;
+              const Icon = platformMeta[key].icon;
               const isActive = active === key;
               return (
                 <button
@@ -121,17 +183,17 @@ function PreviewPage() {
                   )}
                 >
                   <Icon className="h-4 w-4" />
-                  <span className="hidden sm:inline">{p.label}</span>
+                  <span className="hidden sm:inline">{platformMeta[key].label}</span>
                 </button>
               );
             })}
           </div>
 
-          {/* Editor */}
           {platforms.map((key) => {
             if (active !== key) return null;
-            const p = texts[key];
-            const Icon = p.icon;
+            const meta = platformMeta[key];
+            const Icon = meta.icon;
+            const body = texts[key];
             const isEditing = editing === key;
             return (
               <article
@@ -144,7 +206,7 @@ function PreviewPage() {
                       <Icon className="h-4 w-4 text-gold" />
                     </div>
                     <div>
-                      <p className="font-display text-xl text-cream">{p.label} Post</p>
+                      <p className="font-display text-xl text-cream">{meta.label} Post</p>
                       <p className="text-[11px] uppercase tracking-[0.2em] text-gold/80">
                         AI · tone-tuned
                       </p>
@@ -169,22 +231,26 @@ function PreviewPage() {
 
                 {isEditing ? (
                   <Textarea
-                    value={p.body}
+                    value={body}
                     onChange={(e) =>
-                      setTexts((t) => ({ ...t, [key]: { ...t[key], body: e.target.value } }))
+                      setTexts((t) => ({ ...t, [key]: e.target.value }))
                     }
                     rows={12}
                     className="bg-obsidian/60 border-border/60 focus-visible:border-gold/50 focus-visible:ring-gold/40 leading-relaxed text-[15px]"
                   />
-                ) : (
+                ) : body ? (
                   <p className="text-cream/90 whitespace-pre-line leading-relaxed text-[15px] font-light">
-                    {p.body}
+                    {body}
+                  </p>
+                ) : (
+                  <p className="text-muted-foreground italic text-sm">
+                    No copy generated for this channel yet.
                   </p>
                 )}
 
                 <div className="flex items-center justify-between pt-5 mt-5 border-t border-border/40">
                   <p className="text-xs text-muted-foreground">
-                    {p.body.length} characters
+                    {body.length} characters
                   </p>
                   <div className="flex items-center gap-1.5">
                     <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse" />
@@ -198,7 +264,6 @@ function PreviewPage() {
 
         {/* Right — video preview */}
         <aside className="lg:col-span-2 space-y-6">
-          {/* Video card */}
           <section className="bg-gradient-card border border-border/60 rounded-xl p-5 shadow-soft">
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -213,54 +278,70 @@ function PreviewPage() {
             </div>
 
             <div className="relative aspect-[9/16] rounded-lg overflow-hidden bg-obsidian border border-border/60 group">
-              <div
-                className="absolute inset-0 bg-cover bg-center"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(180deg, oklch(0.16 0.005 80 / 0.2) 0%, oklch(0.16 0.005 80 / 0.85) 100%), url(https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=900&q=85)",
-                }}
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <button className="h-16 w-16 rounded-full bg-gradient-gold flex items-center justify-center shadow-gold-glow group-hover:scale-110 transition-transform">
-                  <Play className="h-5 w-5 text-obsidian fill-obsidian ml-0.5" />
-                </button>
-              </div>
+              {videoUrl ? (
+                <video
+                  src={videoUrl}
+                  poster={videoThumb}
+                  controls
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              ) : (
+                <>
+                  <div
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{
+                      backgroundImage: videoThumb
+                        ? `linear-gradient(180deg, oklch(0.16 0.005 80 / 0.2) 0%, oklch(0.16 0.005 80 / 0.85) 100%), url(${videoThumb})`
+                        : "linear-gradient(180deg, oklch(0.16 0.005 80 / 0.2) 0%, oklch(0.16 0.005 80 / 0.85) 100%), url(https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=900&q=85)",
+                    }}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <button className="h-16 w-16 rounded-full bg-gradient-gold flex items-center justify-center shadow-gold-glow group-hover:scale-110 transition-transform">
+                      <Play className="h-5 w-5 text-obsidian fill-obsidian ml-0.5" />
+                    </button>
+                  </div>
 
-              <div className="absolute bottom-0 left-0 right-0 p-4 space-y-1">
-                <p className="text-[10px] uppercase tracking-[0.25em] text-gold">Now showing</p>
-                <p className="font-display text-cream text-lg leading-tight">
-                  Truffle Risotto
-                </p>
-                <p className="text-gradient-gold font-display text-xl">$34 · Tonight only</p>
-              </div>
+                  <div className="absolute top-3 right-3 flex flex-col gap-3 text-cream/90">
+                    <div className="flex flex-col items-center gap-0.5">
+                      <Heart className="h-5 w-5" />
+                      <span className="text-[10px]">8.2k</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-0.5">
+                      <MessageCircle className="h-5 w-5" />
+                      <span className="text-[10px]">142</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-0.5">
+                      <Share2 className="h-5 w-5" />
+                      <span className="text-[10px]">64</span>
+                    </div>
+                  </div>
 
-              <div className="absolute top-3 right-3 flex flex-col gap-3 text-cream/90">
-                <div className="flex flex-col items-center gap-0.5">
-                  <Heart className="h-5 w-5" />
-                  <span className="text-[10px]">8.2k</span>
-                </div>
-                <div className="flex flex-col items-center gap-0.5">
-                  <MessageCircle className="h-5 w-5" />
-                  <span className="text-[10px]">142</span>
-                </div>
-                <div className="flex flex-col items-center gap-0.5">
-                  <Share2 className="h-5 w-5" />
-                  <span className="text-[10px]">64</span>
-                </div>
-              </div>
-
-              {/* Progress shimmer */}
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-obsidian/80">
-                <div className="h-full w-1/3 bg-gradient-gold shimmer" />
-              </div>
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-obsidian/80">
+                    <div className="h-full w-1/3 bg-gradient-gold shimmer" />
+                  </div>
+                </>
+              )}
             </div>
 
-            <Button variant="luxury" size="lg" className="w-full mt-4">
-              <Download className="h-4 w-4" /> Download Video
+            <Button
+              variant="luxury"
+              size="lg"
+              className="w-full mt-4"
+              asChild={!!videoUrl}
+              disabled={!videoUrl}
+            >
+              {videoUrl ? (
+                <a href={videoUrl} download target="_blank" rel="noopener noreferrer">
+                  <Download className="h-4 w-4" /> Download Video
+                </a>
+              ) : (
+                <span>
+                  <Download className="h-4 w-4" /> No video available
+                </span>
+              )}
             </Button>
           </section>
 
-          {/* Schedule card */}
           <section className="bg-gradient-card border border-border/60 rounded-xl p-6 shadow-soft">
             <p className="font-display text-lg text-cream mb-1">Best Time to Post</p>
             <p className="text-xs text-muted-foreground mb-5">

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useCallback } from "react";
 import {
   Upload,
@@ -17,7 +17,9 @@ import {
   Briefcase,
   Home as HomeIcon,
   MoreHorizontal,
+  Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,6 +36,8 @@ export const Route = createFileRoute("/_app/new")({
   }),
   component: NewPublication,
 });
+
+const WEBHOOK_URL = "https://qubesightprojects.fun/webhook/publicar-propiedad";
 
 const platforms = [
   { id: "instagram", label: "Instagram", reach: "Reels · Feed · Stories", icon: Instagram, on: true },
@@ -55,13 +59,57 @@ const businessTypes: { id: BizType; label: string; icon: any }[] = [
   { id: "other", label: "Other", icon: MoreHorizontal },
 ];
 
+const dynamicFieldsConfig: Record<BizType, { key: string; label: string; placeholder: string; full?: boolean }[]> = {
+  restaurant: [
+    { key: "dish_name", label: "Dish Name", placeholder: "Truffle Risotto" },
+    { key: "ingredients", label: "Key Ingredients", placeholder: "Carnaroli rice, black truffle, parmesan" },
+  ],
+  gym: [
+    { key: "class_name", label: "Class Name", placeholder: "Sunrise HIIT" },
+    { key: "schedule", label: "Schedule", placeholder: "Mon · Wed · Fri — 7:00am" },
+    { key: "instructor", label: "Instructor", placeholder: "Coach Marcus Reyes", full: true },
+  ],
+  store: [
+    { key: "product", label: "Product", placeholder: "Linen Summer Dress" },
+    { key: "discount", label: "Discount %", placeholder: "30" },
+  ],
+  academy: [
+    { key: "course_name", label: "Course Name", placeholder: "Intensive English B2" },
+    { key: "duration", label: "Duration", placeholder: "12 weeks" },
+  ],
+  clinic: [
+    { key: "treatment", label: "Treatment / Service", placeholder: "Annual Skin Check" },
+    { key: "specialist", label: "Specialist", placeholder: "Dr. Lina Ortega" },
+  ],
+  realestate: [
+    { key: "property_type", label: "Property Type", placeholder: "Penthouse" },
+    { key: "location", label: "Location", placeholder: "Downtown Miami" },
+    { key: "bedrooms", label: "Bedrooms", placeholder: "3" },
+    { key: "bathrooms", label: "Bathrooms", placeholder: "2" },
+  ],
+  service: [
+    { key: "service_name", label: "Service Name", placeholder: "Deep Home Cleaning" },
+    { key: "service_area", label: "Service Area", placeholder: "Within 20 miles" },
+  ],
+  other: [
+    { key: "category", label: "Category", placeholder: "Tell us what you offer", full: true },
+  ],
+};
+
+type UploadedFile = { name: string; url: string; file: File };
+
 function NewPublication() {
-  const [files, setFiles] = useState<{ name: string; url: string }[]>([]);
+  const navigate = useNavigate();
+  const [files, setFiles] = useState<UploadedFile[]>([]);
   const [drag, setDrag] = useState(false);
   const [bizType, setBizType] = useState<BizType>("restaurant");
   const [enabled, setEnabled] = useState<Record<string, boolean>>(
     Object.fromEntries(platforms.map((p) => [p.id, p.on])),
   );
+  const [fields, setFields] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
+
+  const setField = (k: string, v: string) => setFields((s) => ({ ...s, [k]: v }));
 
   const onDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -69,7 +117,7 @@ function NewPublication() {
     const list = Array.from(e.dataTransfer.files).slice(0, 10);
     setFiles((prev) => [
       ...prev,
-      ...list.map((f) => ({ name: f.name, url: URL.createObjectURL(f) })),
+      ...list.map((f) => ({ name: f.name, url: URL.createObjectURL(f), file: f })),
     ]);
   }, []);
 
@@ -77,9 +125,50 @@ function NewPublication() {
     const list = Array.from(e.target.files ?? []);
     setFiles((prev) => [
       ...prev,
-      ...list.map((f) => ({ name: f.name, url: URL.createObjectURL(f) })),
+      ...list.map((f) => ({ name: f.name, url: URL.createObjectURL(f), file: f })),
     ]);
   };
+
+  const handleGenerate = async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      const fd = new FormData();
+      fd.append("business_type", bizType);
+      fd.append("title", fields.title ?? "");
+      fd.append("description", fields.description ?? "");
+      fd.append("price", fields.price ?? "");
+      fd.append("whatsapp", fields.whatsapp ?? "");
+      // Dynamic fields
+      for (const f of dynamicFieldsConfig[bizType]) {
+        fd.append(f.key, fields[f.key] ?? "");
+      }
+      // Platforms
+      const selectedPlatforms = Object.keys(enabled).filter((k) => enabled[k]);
+      fd.append("platforms", JSON.stringify(selectedPlatforms));
+      // Files
+      files.forEach((f, i) => {
+        fd.append(`files`, f.file, f.file.name);
+        if (i === 0) fd.append("cover", f.file, f.file.name);
+      });
+
+      const res = await fetch(WEBHOOK_URL, { method: "POST", body: fd });
+      if (!res.ok) throw new Error(`Upload failed (${res.status})`);
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch {
+        data = { raw: await res.text() };
+      }
+
+      navigate({ to: "/preview", state: { aiResponse: data, businessType: bizType } as any });
+    } catch (err: any) {
+      toast.error("Generation failed", { description: err?.message ?? "Please try again." });
+      setSubmitting(false);
+    }
+  };
+
+  const dyn = dynamicFieldsConfig[bizType];
 
   return (
     <div className="px-6 sm:px-10 py-12 max-w-[1400px] mx-auto">
@@ -95,7 +184,6 @@ function NewPublication() {
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left — main form */}
         <div className="lg:col-span-2 space-y-6">
           {/* Business type */}
           <section className="bg-gradient-card border border-border/60 rounded-xl p-5 sm:p-7 shadow-soft">
@@ -213,6 +301,8 @@ function NewPublication() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <Field label="Title" full>
                 <Input
+                  value={fields.title ?? ""}
+                  onChange={(e) => setField("title", e.target.value)}
                   placeholder={titleHint(bizType)}
                   className="h-11 bg-input border-border/60 focus-visible:border-gold/50 focus-visible:ring-gold/40"
                 />
@@ -221,16 +311,28 @@ function NewPublication() {
               <Field label="Description" full>
                 <Textarea
                   rows={3}
+                  value={fields.description ?? ""}
+                  onChange={(e) => setField("description", e.target.value)}
                   placeholder={descHint(bizType)}
                   className="bg-input border-border/60 focus-visible:border-gold/50 focus-visible:ring-gold/40"
                 />
               </Field>
 
-              {/* Dynamic fields */}
-              <DynamicFields type={bizType} />
+              {dyn.map((f) => (
+                <Field key={f.key} label={f.label} full={f.full}>
+                  <Input
+                    value={fields[f.key] ?? ""}
+                    onChange={(e) => setField(f.key, e.target.value)}
+                    placeholder={f.placeholder}
+                    className="h-11 bg-input border-border/60 focus-visible:border-gold/50 focus-visible:ring-gold/40"
+                  />
+                </Field>
+              ))}
 
               <Field label="Price / Offer (optional)">
                 <Input
+                  value={fields.price ?? ""}
+                  onChange={(e) => setField("price", e.target.value)}
                   placeholder="$24 · 20% off · Free trial"
                   className="h-11 bg-input border-border/60 focus-visible:border-gold/50 focus-visible:ring-gold/40"
                 />
@@ -238,6 +340,8 @@ function NewPublication() {
 
               <Field label="WhatsApp Contact">
                 <Input
+                  value={fields.whatsapp ?? ""}
+                  onChange={(e) => setField("whatsapp", e.target.value)}
                   placeholder="+1 555 123 4567"
                   className="h-11 bg-input border-border/60 focus-visible:border-gold/50 focus-visible:ring-gold/40"
                 />
@@ -291,13 +395,25 @@ function NewPublication() {
             <div className="hairline my-6" />
 
             <div className="space-y-3">
-              <Button variant="gold" size="lg" className="w-full" asChild>
-                <Link to="/preview">
-                  <Sparkles className="h-4 w-4" /> Generate with AI
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
+              <Button
+                variant="gold"
+                size="lg"
+                className="w-full"
+                onClick={handleGenerate}
+                disabled={submitting}
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" /> Generating…
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4" /> Generate with AI
+                    <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
               </Button>
-              <Button variant="luxury" size="lg" className="w-full">
+              <Button variant="luxury" size="lg" className="w-full" disabled={submitting}>
                 Save as Draft
               </Button>
             </div>
@@ -338,161 +454,6 @@ function descHint(t: BizType) {
     other: "Tell your audience what this is about...",
   };
   return map[t];
-}
-
-function DynamicFields({ type }: { type: BizType }) {
-  if (type === "restaurant") {
-    return (
-      <>
-        <Field label="Dish Name">
-          <Input
-            placeholder="Truffle Risotto"
-            className="h-11 bg-input border-border/60 focus-visible:border-gold/50 focus-visible:ring-gold/40"
-          />
-        </Field>
-        <Field label="Key Ingredients">
-          <Input
-            placeholder="Carnaroli rice, black truffle, parmesan"
-            className="h-11 bg-input border-border/60 focus-visible:border-gold/50 focus-visible:ring-gold/40"
-          />
-        </Field>
-      </>
-    );
-  }
-  if (type === "gym") {
-    return (
-      <>
-        <Field label="Class Name">
-          <Input
-            placeholder="Sunrise HIIT"
-            className="h-11 bg-input border-border/60 focus-visible:border-gold/50 focus-visible:ring-gold/40"
-          />
-        </Field>
-        <Field label="Schedule">
-          <Input
-            placeholder="Mon · Wed · Fri — 7:00am"
-            className="h-11 bg-input border-border/60 focus-visible:border-gold/50 focus-visible:ring-gold/40"
-          />
-        </Field>
-        <Field label="Instructor" full>
-          <Input
-            placeholder="Coach Marcus Reyes"
-            className="h-11 bg-input border-border/60 focus-visible:border-gold/50 focus-visible:ring-gold/40"
-          />
-        </Field>
-      </>
-    );
-  }
-  if (type === "store") {
-    return (
-      <>
-        <Field label="Product">
-          <Input
-            placeholder="Linen Summer Dress"
-            className="h-11 bg-input border-border/60 focus-visible:border-gold/50 focus-visible:ring-gold/40"
-          />
-        </Field>
-        <Field label="Discount %">
-          <Input
-            placeholder="30"
-            className="h-11 bg-input border-border/60 focus-visible:border-gold/50 focus-visible:ring-gold/40"
-          />
-        </Field>
-      </>
-    );
-  }
-  if (type === "academy") {
-    return (
-      <>
-        <Field label="Course Name">
-          <Input
-            placeholder="Intensive English B2"
-            className="h-11 bg-input border-border/60 focus-visible:border-gold/50 focus-visible:ring-gold/40"
-          />
-        </Field>
-        <Field label="Duration">
-          <Input
-            placeholder="12 weeks"
-            className="h-11 bg-input border-border/60 focus-visible:border-gold/50 focus-visible:ring-gold/40"
-          />
-        </Field>
-      </>
-    );
-  }
-  if (type === "clinic") {
-    return (
-      <>
-        <Field label="Treatment / Service">
-          <Input
-            placeholder="Annual Skin Check"
-            className="h-11 bg-input border-border/60 focus-visible:border-gold/50 focus-visible:ring-gold/40"
-          />
-        </Field>
-        <Field label="Specialist">
-          <Input
-            placeholder="Dr. Lina Ortega"
-            className="h-11 bg-input border-border/60 focus-visible:border-gold/50 focus-visible:ring-gold/40"
-          />
-        </Field>
-      </>
-    );
-  }
-  if (type === "realestate") {
-    return (
-      <>
-        <Field label="Property Type">
-          <Input
-            placeholder="Penthouse"
-            className="h-11 bg-input border-border/60 focus-visible:border-gold/50 focus-visible:ring-gold/40"
-          />
-        </Field>
-        <Field label="Location">
-          <Input
-            placeholder="Downtown Miami"
-            className="h-11 bg-input border-border/60 focus-visible:border-gold/50 focus-visible:ring-gold/40"
-          />
-        </Field>
-        <Field label="Bedrooms">
-          <Input
-            placeholder="3"
-            className="h-11 bg-input border-border/60 focus-visible:border-gold/50 focus-visible:ring-gold/40"
-          />
-        </Field>
-        <Field label="Bathrooms">
-          <Input
-            placeholder="2"
-            className="h-11 bg-input border-border/60 focus-visible:border-gold/50 focus-visible:ring-gold/40"
-          />
-        </Field>
-      </>
-    );
-  }
-  if (type === "service") {
-    return (
-      <>
-        <Field label="Service Name">
-          <Input
-            placeholder="Deep Home Cleaning"
-            className="h-11 bg-input border-border/60 focus-visible:border-gold/50 focus-visible:ring-gold/40"
-          />
-        </Field>
-        <Field label="Service Area">
-          <Input
-            placeholder="Within 20 miles"
-            className="h-11 bg-input border-border/60 focus-visible:border-gold/50 focus-visible:ring-gold/40"
-          />
-        </Field>
-      </>
-    );
-  }
-  return (
-    <Field label="Category" full>
-      <Input
-        placeholder="Tell us what you offer"
-        className="h-11 bg-input border-border/60 focus-visible:border-gold/50 focus-visible:ring-gold/40"
-      />
-    </Field>
-  );
 }
 
 function Field({
