@@ -33,6 +33,16 @@ export const Route = createFileRoute("/_app/preview")({
 
 const WEBHOOK_URL = "https://qubesightprojects.fun/webhook/publicar-propiedad";
 
+async function parseWebhookResponse(res: Response) {
+  const body = await res.text();
+  if (!body) return null;
+  try {
+    return JSON.parse(body);
+  } catch {
+    return { raw: body };
+  }
+}
+
 const platformMeta = {
   instagram: { icon: Instagram, label: "Instagram" },
   facebook: { icon: Facebook, label: "Facebook" },
@@ -130,7 +140,11 @@ function PreviewPage() {
       if (aiResponse?.id) fd.append("publication_id", String(aiResponse.id));
 
       const res = await fetch(WEBHOOK_URL, { method: "POST", body: fd });
-      if (!res.ok) throw new Error(`Publish failed (${res.status})`);
+      const data = await parseWebhookResponse(res);
+      if (!res.ok) {
+        const message = data?.error ?? data?.message ?? data?.raw ?? res.statusText;
+        throw new Error(`Publish failed (${res.status}): ${message}`);
+      }
       setPublished(true);
       toast.success("Published to all platforms");
     } catch (err: any) {
