@@ -88,8 +88,20 @@ const platformIcon = (p: string) => {
   return Store;
 };
 
-const publications = [
+type Publication = {
+  id: string;
+  title: string;
+  type: string;
+  thumb: string;
+  platforms: string[];
+  status: string;
+  statusType: "published" | "scheduled" | "draft";
+  time: string;
+};
+
+const initialPublications: Publication[] = [
   {
+    id: "p1",
     title: "Truffle Risotto — Chef's Special",
     type: "Restaurant",
     thumb: "https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=400&q=80",
@@ -99,6 +111,7 @@ const publications = [
     time: "2 minutes ago",
   },
   {
+    id: "p2",
     title: "Sunrise HIIT — Tuesday 7am",
     type: "Gym",
     thumb: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&q=80",
@@ -108,6 +121,7 @@ const publications = [
     time: "Tomorrow, 06:30",
   },
   {
+    id: "p3",
     title: "Summer Collection — 30% Off",
     type: "Store",
     thumb: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&q=80",
@@ -117,6 +131,7 @@ const publications = [
     time: "Awaiting review",
   },
   {
+    id: "p4",
     title: "English Course — Enrollment Open",
     type: "Academy",
     thumb: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&q=80",
