@@ -4,7 +4,10 @@ import { QubeLogo } from "@/components/qube-logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowRight, Mail, Lock } from "lucide-react";
+import { ArrowRight, Mail, Lock, AlertCircle } from "lucide-react";
+
+const VALID_EMAIL = "erlibbylugo@qubesight.lat";
+const VALID_PASSWORD = "@Qub3s1ght2001crc";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -23,6 +26,9 @@ export const Route = createFileRoute("/")({
 function LoginPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"login" | "register">("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   return (
     <div className="min-h-screen w-full grid lg:grid-cols-2 bg-background relative overflow-hidden">
@@ -91,7 +97,22 @@ function LoginPage() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              navigate({ to: "/dashboard" });
+              setError(null);
+              if (mode === "login") {
+                if (
+                  email.trim().toLowerCase() === VALID_EMAIL &&
+                  password === VALID_PASSWORD
+                ) {
+                  try {
+                    sessionStorage.setItem("qs_auth", "1");
+                  } catch {}
+                  navigate({ to: "/dashboard" });
+                } else {
+                  setError("Invalid credentials. Please verify your email and password.");
+                }
+              } else {
+                navigate({ to: "/dashboard" });
+              }
             }}
             className="space-y-5"
           >
@@ -114,7 +135,10 @@ function LoginPage() {
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="alexandre@maison.com"
+                  autoComplete="email"
                   className="h-12 pl-11 bg-input border-border/60 focus-visible:ring-gold/40 focus-visible:border-gold/50"
                 />
               </div>
@@ -127,7 +151,10 @@ function LoginPage() {
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••"
+                  autoComplete="current-password"
                   className="h-12 pl-11 bg-input border-border/60 focus-visible:ring-gold/40 focus-visible:border-gold/50"
                 />
               </div>
@@ -141,6 +168,13 @@ function LoginPage() {
                 >
                   Forgot password?
                 </button>
+              </div>
+            )}
+
+            {error && (
+              <div className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2.5 text-xs text-destructive">
+                <AlertCircle className="h-4 w-4 mt-px shrink-0" />
+                <span>{error}</span>
               </div>
             )}
 
