@@ -252,7 +252,7 @@ function Dashboard() {
               </Button>
             </div>
           )}
-          {publications.map((p, i) => {
+          {!isLoading && publications.map((p, i) => {
             const StatusIcon =
               p.statusType === "published" ? CheckCircle2 : p.statusType === "scheduled" ? Clock : Sparkles;
             return (
