@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   TrendingUp,
   Megaphone,
@@ -13,8 +14,30 @@ import {
   Music2,
   Store,
   Crown,
+  MoreHorizontal,
+  Eye,
+  Copy,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/dashboard")({
@@ -65,8 +88,20 @@ const platformIcon = (p: string) => {
   return Store;
 };
 
-const publications = [
+type Publication = {
+  id: string;
+  title: string;
+  type: string;
+  thumb: string;
+  platforms: string[];
+  status: string;
+  statusType: "published" | "scheduled" | "draft";
+  time: string;
+};
+
+const initialPublications: Publication[] = [
   {
+    id: "p1",
     title: "Truffle Risotto — Chef's Special",
     type: "Restaurant",
     thumb: "https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=400&q=80",
@@ -76,6 +111,7 @@ const publications = [
     time: "2 minutes ago",
   },
   {
+    id: "p2",
     title: "Sunrise HIIT — Tuesday 7am",
     type: "Gym",
     thumb: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&q=80",
@@ -85,6 +121,7 @@ const publications = [
     time: "Tomorrow, 06:30",
   },
   {
+    id: "p3",
     title: "Summer Collection — 30% Off",
     type: "Store",
     thumb: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&q=80",
@@ -94,6 +131,7 @@ const publications = [
     time: "Awaiting review",
   },
   {
+    id: "p4",
     title: "English Course — Enrollment Open",
     type: "Academy",
     thumb: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&q=80",
@@ -111,6 +149,40 @@ const statusStyles: Record<string, string> = {
 };
 
 function Dashboard() {
+  const navigate = useNavigate();
+  const [publications, setPublications] = useState<Publication[]>(initialPublications);
+  const [toDelete, setToDelete] = useState<Publication | null>(null);
+
+  const handleOpen = (p: Publication) => {
+    toast.success(`Opening "${p.title}"`);
+    navigate({ to: "/preview" });
+  };
+
+  const handleDuplicate = (p: Publication) => {
+    const copy: Publication = {
+      ...p,
+      id: `${p.id}-copy-${Date.now()}`,
+      title: `${p.title} (Copy)`,
+      status: "Draft",
+      statusType: "draft",
+      time: "Just now",
+    };
+    setPublications((prev) => {
+      const idx = prev.findIndex((x) => x.id === p.id);
+      const next = [...prev];
+      next.splice(idx + 1, 0, copy);
+      return next;
+    });
+    toast.success("Publication duplicated");
+  };
+
+  const confirmDelete = () => {
+    if (!toDelete) return;
+    setPublications((prev) => prev.filter((x) => x.id !== toDelete.id));
+    toast.success(`"${toDelete.title}" deleted`);
+    setToDelete(null);
+  };
+
   return (
     <div className="px-6 sm:px-10 py-12 max-w-[1400px] mx-auto pb-32">
       {/* Header */}
@@ -219,6 +291,32 @@ function Dashboard() {
                   </span>
                   <p className="text-[11px] text-muted-foreground mt-1.5">{p.time}</p>
                 </div>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      className="h-9 w-9 shrink-0 rounded-md flex items-center justify-center text-cream/60 hover:text-gold hover:bg-gold/5 border border-transparent hover:border-gold/20 transition-colors focus:outline-none focus:ring-1 focus:ring-gold/40"
+                      aria-label={`Actions for ${p.title}`}
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-44">
+                    <DropdownMenuItem onClick={() => handleOpen(p)}>
+                      <Eye className="h-4 w-4" /> Open
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleDuplicate(p)}>
+                      <Copy className="h-4 w-4" /> Duplicate
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => setToDelete(p)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" /> Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             );
           })}
@@ -233,6 +331,27 @@ function Dashboard() {
       >
         <Plus className="h-6 w-6 text-obsidian" />
       </Link>
+
+      {/* Delete confirmation */}
+      <AlertDialog open={!!toDelete} onOpenChange={(o) => !o && setToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">Delete this publication?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {toDelete ? `"${toDelete.title}" will be permanently removed. This action cannot be undone.` : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
