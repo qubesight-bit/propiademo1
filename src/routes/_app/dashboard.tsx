@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   TrendingUp,
