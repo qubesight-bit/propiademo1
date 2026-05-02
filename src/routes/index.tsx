@@ -171,6 +171,13 @@ function LoginPage() {
               </div>
             )}
 
+            {error && (
+              <div className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2.5 text-xs text-destructive">
+                <AlertCircle className="h-4 w-4 mt-px shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
             <Button type="submit" variant="gold" size="lg" className="w-full mt-2 group">
               {mode === "login" ? "Sign In" : "Create Account"}
               <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
