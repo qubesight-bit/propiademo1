@@ -112,6 +112,13 @@ function Dashboard() {
   const navigate = useNavigate();
   const [publications, setPublications] = useState<Publication[]>(initialPublications);
   const [toDelete, setToDelete] = useState<Publication | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate fetching publications
+    const t = setTimeout(() => setIsLoading(false), 1200);
+    return () => clearTimeout(t);
+  }, []);
 
   const handleOpen = (p: Publication) => {
     toast.success(`Opening "${p.title}"`);
