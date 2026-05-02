@@ -29,14 +29,20 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "QubeSight — Luxury Real Estate Automation" },
+      {
+        name: "description",
+        content:
+          "QubeSight orchestrates intelligent publication of luxury real estate listings across every social channel — composed, scheduled, and elevated by AI.",
+      },
+      { name: "author", content: "QubeSight" },
+      { property: "og:title", content: "QubeSight — Luxury Real Estate Automation" },
+      {
+        property: "og:description",
+        content: "The private automation suite for elite real estate ateliers.",
+      },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       {
