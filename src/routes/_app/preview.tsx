@@ -75,9 +75,19 @@ function PreviewPage() {
   const navigate = useNavigate();
   const stateFromRoute = (location.state ?? {}) as { aiResponse?: any };
 
+  const ENDPOINT_VERSION = "v2-api-publicar";
+
   const [aiResponse, setAiResponse] = useState<any>(() => {
     if (stateFromRoute.aiResponse) return stateFromRoute.aiResponse;
     if (typeof window === "undefined") return null;
+    // Invalidate cached state from previous endpoint versions
+    if (sessionStorage.getItem("qs_pub_version") !== ENDPOINT_VERSION) {
+      sessionStorage.removeItem("qs_pub_response");
+      sessionStorage.removeItem("qs_pub_error");
+      sessionStorage.removeItem("qs_pub_loading");
+      sessionStorage.setItem("qs_pub_version", ENDPOINT_VERSION);
+      return null;
+    }
     const stored = sessionStorage.getItem("qs_pub_response");
     return stored ? JSON.parse(stored) : null;
   });
@@ -85,6 +95,13 @@ function PreviewPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    // If no generation is in flight and no response yet, clear stale errors
+    if (
+      !sessionStorage.getItem("qs_pub_loading") &&
+      !sessionStorage.getItem("qs_pub_response")
+    ) {
+      sessionStorage.removeItem("qs_pub_error");
+    }
     const sync = () => {
       const err = sessionStorage.getItem("qs_pub_error");
       if (err) {
