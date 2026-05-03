@@ -257,27 +257,32 @@ function PreviewPage() {
             platforms with one click.
           </p>
         </div>
-        <Button
-          variant="gold"
-          size="xl"
-          onClick={handlePublishAll}
-          disabled={publishing || published}
-          className="min-w-[200px]"
-        >
-          {published ? (
-            <>
-              <Check className="h-4 w-4" /> Published
-            </>
-          ) : publishing ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" /> Publishing…
-            </>
-          ) : (
-            <>
-              <Send className="h-4 w-4" /> Publish All
-            </>
-          )}
-        </Button>
+        <div className="flex flex-wrap items-center gap-3">
+          <Button variant="luxury" size="lg" onClick={handleResetPreview}>
+            Reset preview state
+          </Button>
+          <Button
+            variant="gold"
+            size="xl"
+            onClick={handlePublishAll}
+            disabled={publishing || published}
+            className="min-w-[200px]"
+          >
+            {published ? (
+              <>
+                <Check className="h-4 w-4" /> Published
+              </>
+            ) : publishing ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" /> Publishing…
+              </>
+            ) : (
+              <>
+                <Send className="h-4 w-4" /> Publish All
+              </>
+            )}
+          </Button>
+        </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
