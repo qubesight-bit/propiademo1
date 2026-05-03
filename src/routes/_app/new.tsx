@@ -37,7 +37,7 @@ export const Route = createFileRoute("/_app/new")({
   component: NewPublication,
 });
 
-const WEBHOOK_URL = "https://qubesightprojects.fun/webhook/publicar-propiedad";
+const WEBHOOK_URL = "https://qubesightprojects.fun/api/publicar";
 
 async function parseWebhookResponse(res: Response) {
   const body = await res.text();
