@@ -171,6 +171,22 @@ function PreviewPage() {
     }
   };
 
+  const handleResetPreview = () => {
+    if (typeof window === "undefined") return;
+    Object.keys(sessionStorage)
+      .filter((k) => k.startsWith("qs_pub_"))
+      .forEach((k) => sessionStorage.removeItem(k));
+    sessionStorage.setItem("qs_pub_version", ENDPOINT_VERSION);
+    setAiResponse(null);
+    setLoadError(null);
+    setTexts(fallbackTexts);
+    setPublished(false);
+    setPublishing(false);
+    setEditing(null);
+    window.dispatchEvent(new Event("qs_pub_update"));
+    toast.success("Preview state cleared");
+  };
+
   if (loadError) {
     return (
       <div className="px-6 sm:px-10 py-12 max-w-[1400px] mx-auto">
@@ -182,17 +198,21 @@ function PreviewPage() {
             Something went <span className="italic text-gradient-gold">wrong</span>
           </h1>
           <p className="mt-3 text-muted-foreground max-w-md">{loadError}</p>
-          <Button
-            variant="gold"
-            size="lg"
-            className="mt-8"
-            onClick={() => {
-              sessionStorage.removeItem("qs_pub_error");
-              navigate({ to: "/new" });
-            }}
-          >
-            Try again
-          </Button>
+          <div className="mt-8 flex flex-wrap gap-3 justify-center">
+            <Button
+              variant="gold"
+              size="lg"
+              onClick={() => {
+                sessionStorage.removeItem("qs_pub_error");
+                navigate({ to: "/new" });
+              }}
+            >
+              Try again
+            </Button>
+            <Button variant="luxury" size="lg" onClick={handleResetPreview}>
+              Reset preview state
+            </Button>
+          </div>
         </div>
       </div>
     );
